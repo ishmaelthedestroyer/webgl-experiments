@@ -11,6 +11,6 @@ app.config ($stateProvider) ->
     url: 'custom-vertices'
     templateUrl: '/routes/2-custom-vertices/views/custom-vertices.html'
 
-  $stateProvider.state 'index.generic-shapes',
-    url: 'generic-shapes'
-    templateUrl: '/routes/3-generic-shapes/views/generic-shapes.html'
+  $stateProvider.state 'index.add-shapes',
+    url: 'add-shapes'
+    templateUrl: '/routes/3-add-shapes/views/add-shapes.html'

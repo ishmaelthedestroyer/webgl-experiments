@@ -115,12 +115,6 @@ app.controller 'BasicPropertiesCtrl', [
     contZ.onChange (value) ->
       shape.position.z = controls.positionZ
 
-    guiTranslate = gui.addFolder 'translate'
-    guiTranslate.add controls, 'translateX', -10, 10
-    guiTranslate.add controls, 'translateY', -4, 20
-    guiTranslate.add controls, 'translateZ', -10, 10
-    guiTranslate.add controls, 'translate'
-
     guiContainer = document.getElementById 'gui'
     guiContainer.appendChild gui.domElement
 

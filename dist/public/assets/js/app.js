@@ -1,5 +1,5 @@
 /** 
- * topo-experiments - v0.0.0 - 2014-01-01
+ * topo-experiments - v0.0.0 - 2014-01-20
  * topo-experiments.com 
  * 
  * Copyright (c) 2014 ishmael td
@@ -45,15 +45,15 @@ app.config(function($stateProvider) {
     url: 'custom-vertices',
     templateUrl: '/routes/2-custom-vertices/views/custom-vertices.html'
   });
-  return $stateProvider.state('index.generic-shapes', {
-    url: 'generic-shapes',
-    templateUrl: '/routes/3-generic-shapes/views/generic-shapes.html'
+  return $stateProvider.state('index.add-shapes', {
+    url: 'add-shapes',
+    templateUrl: '/routes/3-add-shapes/views/add-shapes.html'
   });
 });
 
 app.controller('BasicPropertiesCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var ambientLight, apply, camera, contX, contY, contZ, controls, geometry, gui, guiContainer, guiPosition, guiScale, guiTranslate, h, material, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, shape, spotLight, w, wrap;
+    var ambientLight, apply, camera, contX, contY, contZ, controls, geometry, gui, guiContainer, guiPosition, guiScale, h, material, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, shape, spotLight, w, wrap;
     wrap = document.getElementById('wrap');
     scene = new THREE.Scene();
     w = $('#wrap').width();
@@ -138,11 +138,6 @@ app.controller('BasicPropertiesCtrl', [
     contZ.onChange(function(value) {
       return shape.position.z = controls.positionZ;
     });
-    guiTranslate = gui.addFolder('translate');
-    guiTranslate.add(controls, 'translateX', -10, 10);
-    guiTranslate.add(controls, 'translateY', -4, 20);
-    guiTranslate.add(controls, 'translateZ', -10, 10);
-    guiTranslate.add(controls, 'translate');
     guiContainer = document.getElementById('gui');
     guiContainer.appendChild(gui.domElement);
     $('#output').append(renderer.domElement);
@@ -324,9 +319,9 @@ app.controller('CustomVerticesCtrl', [
   }
 ]);
 
-app.controller('BasicPropertiesCtrl', [
+app.controller('AddShapesCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var ambientLight, apply, camera, contX, contY, contZ, controls, geometry, gui, guiContainer, guiPosition, guiScale, guiTranslate, h, material, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, shape, spotLight, w, wrap;
+    var ambientLight, apply, camera, controls, geometry, gui, guiContainer, h, material, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, shape, spotLight, w, wrap;
     wrap = document.getElementById('wrap');
     scene = new THREE.Scene();
     w = $('#wrap').width();
@@ -366,56 +361,41 @@ app.controller('BasicPropertiesCtrl', [
     shape.castShadow = true;
     scene.add(shape);
     controls = new function() {
-      var _this = this;
-      this.scaleX = 1;
-      this.scaleY = 1;
-      this.scaleZ = 1;
-      this.positionX = 0;
-      this.positionY = 4;
-      this.positionZ = 0;
-      this.rotationX = 0;
-      this.rotationY = 0;
-      this.rotationZ = 0;
-      this.scale = 1;
-      this.translateX = 0;
-      this.translateY = 0;
-      this.translateZ = 0;
-      this.translate = function() {
-        shape.translateX(_this.translateX);
-        shape.translateY(_this.translateY);
-        shape.translateZ(_this.translateZ);
-        _this.positionX = shape.position.x;
-        _this.positionY = shape.position.y;
-        return _this.positionZ = shape.position.z;
+      this.rotationSpeed = 0.02;
+      this.addCube = function() {
+        var _cube, _geometry, _material, _size;
+        _size = Math.ceil(Math.random() * 3);
+        _geometry = new THREE.CubeGeometry(_size, _size, _size);
+        _material = new THREE.MeshLambertMaterial({
+          color: Math.random() * 0xffffff
+        });
+        _cube = new THREE.Mesh(_geometry, _material);
+        _cube.name = 'cube-' + scene.children.length;
+        _cube.position.x = -30 + Math.round(Math.random() * planeGeometry.width);
+        _cube.position.y = Math.round(Math.random() * 5);
+        _cube.position.z = Math.round(Math.random() * planeGeometry.height);
+        return scene.add(_cube);
+      };
+      this.addSphere = function() {
+        var _geometry, _material, _size, _sphere;
+        _size = Math.ceil(Math.random() * 10);
+        _geometry = new THREE.SphereGeometry(_size, 20, 20);
+        _material = new THREE.MeshLambertMaterial({
+          color: Math.random() * 0xffffff
+        });
+        _sphere = new THREE.Mesh(_geometry, _material);
+        _sphere.name = 'cube-' + scene.children.length;
+        _sphere.position.x = -30 + Math.round(Math.random() * planeGeometry.width);
+        _sphere.position.y = Math.round(Math.random() * 5);
+        _sphere.position.z = Math.round(Math.random() * planeGeometry.height);
+        return scene.add(_sphere);
       };
       return this;
     };
     gui = new dat.GUI();
-    guiScale = gui.addFolder('scale');
-    guiScale.add(controls, 'scaleX', 0, 5);
-    guiScale.add(controls, 'scaleY', 0, 5);
-    guiScale.add(controls, 'scaleZ', 0, 5);
-    guiPosition = gui.addFolder('position');
-    contX = guiPosition.add(controls, 'positionX', -10, 10);
-    contY = guiPosition.add(controls, 'positionY', -4, 20);
-    contZ = guiPosition.add(controls, 'positionZ', -10, 10);
-    contX.listen();
-    contX.onChange(function(value) {
-      return shape.position.x = controls.positionX;
-    });
-    contY.listen();
-    contY.onChange(function(value) {
-      return shape.position.y = controls.positionY;
-    });
-    contZ.listen();
-    contZ.onChange(function(value) {
-      return shape.position.z = controls.positionZ;
-    });
-    guiTranslate = gui.addFolder('translate');
-    guiTranslate.add(controls, 'translateX', -10, 10);
-    guiTranslate.add(controls, 'translateY', -4, 20);
-    guiTranslate.add(controls, 'translateZ', -10, 10);
-    guiTranslate.add(controls, 'translate');
+    gui.add(controls, 'rotationSpeed', 0, 0.5);
+    gui.add(controls, 'addCube');
+    gui.add(controls, 'addSphere');
     guiContainer = document.getElementById('gui');
     guiContainer.appendChild(gui.domElement);
     $('#output').append(renderer.domElement);
@@ -427,7 +407,13 @@ app.controller('BasicPropertiesCtrl', [
       return renderer.setSize(w, h);
     };
     render = function() {
-      shape.scale.set(controls.scaleX, controls.scaleY, controls.scaleZ);
+      scene.traverse(function(e) {
+        if (e instanceof THREE.Mesh && e !== plane) {
+          e.rotation.x += controls.rotationSpeed;
+          e.rotation.y += controls.rotationSpeed;
+          return e.rotation.z += controls.rotationSpeed;
+        }
+      });
       requestAnimationFrame(render);
       return renderer.render(scene, camera);
     };

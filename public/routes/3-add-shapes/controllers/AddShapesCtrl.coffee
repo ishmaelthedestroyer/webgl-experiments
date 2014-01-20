@@ -1,4 +1,4 @@
-app.controller 'BasicPropertiesCtrl', [
+app.controller 'AddShapesCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger'
   ($scope, $state, Socket, Notify, Logger) ->
     # container for rendering
@@ -63,63 +63,45 @@ app.controller 'BasicPropertiesCtrl', [
 
     # add controls
     controls = new ->
-      @scaleX = 1
-      @scaleY = 1
-      @scaleZ = 1
+      @rotationSpeed = 0.02
 
-      @positionX = 0
-      @positionY = 4
-      @positionZ = 0
+      @addCube = () ->
+        _size = Math.ceil Math.random() * 3
+        _geometry = new THREE.CubeGeometry _size, _size, _size
+        _material = new THREE.MeshLambertMaterial
+          color: Math.random() * 0xffffff
+        _cube = new THREE.Mesh _geometry, _material
+        _cube.name = 'cube-' + scene.children.length
 
-      @rotationX = 0
-      @rotationY = 0
-      @rotationZ = 0
-      @scale = 1
+        # position cube somewhere random on the scene
+        _cube.position.x = -30 + Math.round Math.random() * planeGeometry.width
+        _cube.position.y = Math.round Math.random() * 5
+        _cube.position.z = Math.round Math.random() * planeGeometry.height
 
-      @translateX = 0
-      @translateY = 0
-      @translateZ = 0
+        scene.add _cube
 
-      @translate = () =>
-        shape.translateX @translateX
-        shape.translateY @translateY
-        shape.translateZ @translateZ
+      @addSphere = () ->
+        _size = Math.ceil Math.random() * 10
+        _geometry = new THREE.SphereGeometry _size, 20, 20
+        _material = new THREE.MeshLambertMaterial
+          color: Math.random() * 0xffffff
+        _sphere = new THREE.Mesh _geometry, _material
+        _sphere.name = 'cube-' + scene.children.length
 
-        @positionX = shape.position.x
-        @positionY = shape.position.y
-        @positionZ = shape.position.z
+        # position cube somewhere random on the scene
+        _sphere.position.x = -30 +
+          Math.round Math.random() * planeGeometry.width
+        _sphere.position.y = Math.round Math.random() * 5
+        _sphere.position.z = Math.round Math.random() * planeGeometry.height
+
+        scene.add _sphere
 
       return @
 
     gui = new dat.GUI()
-
-    guiScale = gui.addFolder 'scale'
-    guiScale.add controls, 'scaleX', 0, 5
-    guiScale.add controls, 'scaleY', 0, 5
-    guiScale.add controls, 'scaleZ', 0, 5
-
-    guiPosition = gui.addFolder 'position'
-    contX = guiPosition.add controls, 'positionX', -10, 10
-    contY = guiPosition.add controls, 'positionY', -4, 20
-    contZ = guiPosition.add controls, 'positionZ', -10, 10
-
-    contX.listen()
-    contX.onChange (value) ->
-      shape.position.x = controls.positionX
-
-    contY.listen()
-    contY.onChange (value) ->
-      shape.position.y = controls.positionY
-
-    contZ.listen()
-    contZ.onChange (value) ->
-      shape.position.z = controls.positionZ
-
-    guiTranslate = gui.addFolder 'translate'
-    guiTranslate.add controls, 'translateX', -10, 10
-    guiTranslate.add controls, 'translateY', -4, 20
-    guiTranslate.add controls, 'translateZ', -10, 10
-    guiTranslate.add controls, 'translate'
+    gui.add controls, 'rotationSpeed', 0, 0.5
+    gui.add controls, 'addCube'
+    gui.add controls, 'addSphere'
 
     guiContainer = document.getElementById 'gui'
     guiContainer.appendChild gui.domElement
@@ -136,8 +118,12 @@ app.controller 'BasicPropertiesCtrl', [
       renderer.setSize w, h
 
     render = () ->
-      # attach shape to controls
-      shape.scale.set controls.scaleX, controls.scaleY, controls.scaleZ
+      # rotate the shapes
+      scene.traverse (e) ->
+        if e instanceof THREE.Mesh and e != plane
+          e.rotation.x += controls.rotationSpeed
+          e.rotation.y += controls.rotationSpeed
+          e.rotation.z += controls.rotationSpeed
 
       requestAnimationFrame(render)
       renderer.render scene, camera
