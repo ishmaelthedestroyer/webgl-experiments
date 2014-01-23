@@ -81,7 +81,7 @@ app.controller 'AddShapesCtrl', [
         scene.add _cube
 
       @addSphere = () ->
-        _size = Math.ceil Math.random() * 10
+        _size = Math.ceil Math.random() * 3
         _geometry = new THREE.SphereGeometry _size, 20, 20
         _material = new THREE.MeshLambertMaterial
           color: Math.random() * 0xffffff
@@ -96,12 +96,29 @@ app.controller 'AddShapesCtrl', [
 
         scene.add _sphere
 
+      @addCylinder = () ->
+        _size = Math.ceil Math.random() * 3
+        _geometry = new THREE.CylinderGeometry _size, _size, _size * 3
+        _material = new THREE.MeshLambertMaterial
+          color: Math.random() * 0xffffff
+        _shape = new THREE.Mesh _geometry, _material
+        _shape.name = 'cube-' + scene.children.length
+
+        # position cube somewhere random on the scene
+        _shape.position.x = -30 +
+          Math.round Math.random() * planeGeometry.width
+        _shape.position.y = Math.round Math.random() * 5
+        _shape.position.z = Math.round Math.random() * planeGeometry.height
+
+        scene.add _shape
+
       return @
 
     gui = new dat.GUI()
     gui.add controls, 'rotationSpeed', 0, 0.5
     gui.add controls, 'addCube'
     gui.add controls, 'addSphere'
+    gui.add controls, 'addCylinder'
 
     guiContainer = document.getElementById 'gui'
     guiContainer.appendChild gui.domElement

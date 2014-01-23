@@ -1,5 +1,5 @@
 /** 
- * topo-experiments - v0.0.0 - 2014-01-20
+ * topo-experiments - v0.0.0 - 2014-01-23
  * topo-experiments.com 
  * 
  * Copyright (c) 2014 ishmael td
@@ -45,9 +45,13 @@ app.config(function($stateProvider) {
     url: 'custom-vertices',
     templateUrl: '/routes/2-custom-vertices/views/custom-vertices.html'
   });
-  return $stateProvider.state('index.add-shapes', {
+  $stateProvider.state('index.add-shapes', {
     url: 'add-shapes',
     templateUrl: '/routes/3-add-shapes/views/add-shapes.html'
+  });
+  return $stateProvider.state('index.trackball-camera', {
+    url: 'trackball-camera',
+    templateUrl: '/routes/4-trackball-camera/views/trackball-camera.html'
   });
 });
 
@@ -378,7 +382,7 @@ app.controller('AddShapesCtrl', [
       };
       this.addSphere = function() {
         var _geometry, _material, _size, _sphere;
-        _size = Math.ceil(Math.random() * 10);
+        _size = Math.ceil(Math.random() * 3);
         _geometry = new THREE.SphereGeometry(_size, 20, 20);
         _material = new THREE.MeshLambertMaterial({
           color: Math.random() * 0xffffff
@@ -390,12 +394,27 @@ app.controller('AddShapesCtrl', [
         _sphere.position.z = Math.round(Math.random() * planeGeometry.height);
         return scene.add(_sphere);
       };
+      this.addCylinder = function() {
+        var _geometry, _material, _shape, _size;
+        _size = Math.ceil(Math.random() * 3);
+        _geometry = new THREE.CylinderGeometry(_size, _size, _size * 3);
+        _material = new THREE.MeshLambertMaterial({
+          color: Math.random() * 0xffffff
+        });
+        _shape = new THREE.Mesh(_geometry, _material);
+        _shape.name = 'cube-' + scene.children.length;
+        _shape.position.x = -30 + Math.round(Math.random() * planeGeometry.width);
+        _shape.position.y = Math.round(Math.random() * 5);
+        _shape.position.z = Math.round(Math.random() * planeGeometry.height);
+        return scene.add(_shape);
+      };
       return this;
     };
     gui = new dat.GUI();
     gui.add(controls, 'rotationSpeed', 0, 0.5);
     gui.add(controls, 'addCube');
     gui.add(controls, 'addSphere');
+    gui.add(controls, 'addCylinder');
     guiContainer = document.getElementById('gui');
     guiContainer.appendChild(gui.domElement);
     $('#output').append(renderer.domElement);
@@ -426,6 +445,89 @@ app.controller('AddShapesCtrl', [
       gui.destroy() if gui
     */
 
+    return apply = function(scope, fn) {
+      if (scope.$$phase || scope.$root.$$phase) {
+        return fn();
+      } else {
+        return scope.$apply(fn);
+      }
+    };
+  }
+]);
+
+app.controller('TrackballCameraCtrl', [
+  '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
+    var ambientLight, apply, camera, controls, h, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, spotLight, w, wrap;
+    wrap = document.getElementById('wrap');
+    scene = new THREE.Scene();
+    w = $('#wrap').width();
+    h = $('#wrap').height();
+    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setClearColorHex(0xEEEEEE, 1.0);
+    renderer.setSize(w, h);
+    renderer.shadowMapEnabled = true;
+    planeGeometry = new THREE.PlaneGeometry(60, 60, 10, 10);
+    planeMaterial = new THREE.MeshLambertMaterial({
+      color: 0xffffff,
+      wireframe: true
+    });
+    plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    scene.add(plane);
+    planeGeometry = new THREE.PlaneGeometry(60, 60, 10, 10);
+    planeMaterial = new THREE.MeshLambertMaterial({
+      color: 0xffffff,
+      wireframe: true
+    });
+    plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.rotation.y = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    scene.add(plane);
+    camera.position.x = -60;
+    camera.position.y = 60;
+    camera.position.z = 60;
+    camera.lookAt(scene.position);
+    ambientLight = new THREE.AmbientLight(0x0c0c0c);
+    scene.add(ambientLight);
+    spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(-40, 60, 20);
+    spotLight.castShadow = true;
+    scene.add(spotLight);
+    controls = new THREE.TrackballControls(camera);
+    controls.rotateSpeed = 1.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.noZoom = false;
+    controls.noPan = false;
+    controls.staticMoving = true;
+    controls.dynamicDampingFactor = 0.3;
+    controls.keys = [65, 83, 68];
+    controls.addEventListener('change', render);
+    $('#output').append(renderer.domElement);
+    resize = function() {
+      w = wrap.clientWidth;
+      h = wrap.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      return controls.handleResize();
+    };
+    render = function() {
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+      return controls.update();
+    };
+    window.addEventListener('resize', resize, false);
+    render();
     return apply = function(scope, fn) {
       if (scope.$$phase || scope.$root.$$phase) {
         return fn();

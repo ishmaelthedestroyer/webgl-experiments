@@ -10,5 +10,7 @@ div '.container.full-screen', 'ng-controller':'IndexCtrl', ->
           a href:'/custom-vertices', 'Custom Vertices'
         li 'ng-class':"{active: state.current.name=='index.add-shapes'}", ->
           a href:'/add-shapes', 'Add Shapes'
+        li 'ng-class':"{active: state.current.name=='index.trackball-camera'}", ->
+          a href:'/trackball-camera', 'Trackball Camera'
     div '.col-md-9.tall', ->
       div '.full-screen', 'ui-view':' ', ->

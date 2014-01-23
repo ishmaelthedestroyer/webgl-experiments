@@ -14,3 +14,7 @@ app.config ($stateProvider) ->
   $stateProvider.state 'index.add-shapes',
     url: 'add-shapes'
     templateUrl: '/routes/3-add-shapes/views/add-shapes.html'
+
+  $stateProvider.state 'index.trackball-camera',
+    url: 'trackball-camera'
+    templateUrl: '/routes/4-trackball-camera/views/trackball-camera.html'
