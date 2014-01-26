@@ -18,3 +18,13 @@ app.config ($stateProvider) ->
   $stateProvider.state 'index.trackball-camera',
     url: 'trackball-camera'
     templateUrl: '/routes/4-trackball-camera/views/trackball-camera.html'
+
+  $stateProvider.state 'index.basic-properties-sphere',
+    url: 'basic-properties-sphere'
+    templateUrl: '/routes/5-basic-properties-sphere/' +
+      'views/basic-properties-sphere.html'
+
+  $stateProvider.state 'index.advanced-properties-sphere',
+    url: 'advanced-properties-sphere'
+    templateUrl: '/routes/6-advanced-properties-sphere/' +
+      'views/advanced-properties-sphere.html'

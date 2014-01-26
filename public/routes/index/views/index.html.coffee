@@ -5,7 +5,11 @@ div '.container.full-screen', 'ng-controller':'IndexCtrl', ->
         a href:'/', 'Topo Experiments'
       ul '.nav.nav-stacked.nav-pills.nav-pills.square', ->
         li 'ng-class':"{active: state.current.name=='index.basic-properties'}", ->
-          a href:'/basic-properties', 'Basic Properties'
+          a href:'/basic-properties', 'Basic Properties (Cube)'
+        li 'ng-class':"{active: state.current.name=='index.basic-properties-sphere'}", ->
+          a href:'/basic-properties-sphere', 'Basic Properties (Sphere)'
+        li 'ng-class':"{active: state.current.name=='index.advanced-properties-sphere'}", ->
+          a href:'/advanced-properties-sphere', 'Advanced Properties (Sphere)'
         li 'ng-class':"{active: state.current.name=='index.custom-vertices'}", ->
           a href:'/custom-vertices', 'Custom Vertices'
         li 'ng-class':"{active: state.current.name=='index.add-shapes'}", ->
