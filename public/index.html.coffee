@@ -50,16 +50,16 @@ html 'ng-controller':'bxCtrl', ->
             ul '.nav.nav-stacked.nav-pills', ->
               li 'ng-class':"{active: bxState.current.name=='trackball-camera'}", ->
                 a href:'/trackball-camera', 'Trackball Camera'
-              li 'ng-class':"{active: bxState.current.name=='basic-properties'}", ->
-                a href:'/basic-properties', 'Basic Properties (Cube)'
-              li 'ng-class':"{active: bxState.current.name=='basic-properties-sphere'}", ->
-                a href:'/basic-properties', 'Basic Properties (Sphere)'
-              li 'ng-class':"{active: bxState.current.name=='advanced-properties-sphere'}", ->
-                a href:'/advanced-properties-sphere', 'Advanced Properties (Sphere)'
               li 'ng-class':"{active: bxState.current.name=='custom-vertices'}", ->
                 a href:'/custom-vertices', 'Custom Vertices'
               li 'ng-class':"{active: bxState.current.name=='add-shapes'}", ->
                 a href:'/add-shapes', 'Add Shapes'
+              li 'ng-class':"{active: bxState.current.name=='basic-properties'}", ->
+                a href:'/basic-properties', 'Basic Properties (Cube)'
+              li 'ng-class':"{active: bxState.current.name=='basic-properties-sphere'}", ->
+                a href:'/basic-properties-sphere', 'Basic Properties (Sphere)'
+              li 'ng-class':"{active: bxState.current.name=='advanced-properties-sphere'}", ->
+                a href:'/advanced-properties-sphere', 'Advanced Properties (Sphere)'
         div '.col-md-9.tall', ->
           div '.full-screen', 'ui-view':' ', ->
 
