@@ -42,7 +42,25 @@ html 'ng-controller':'bxCtrl', ->
 
     div '.loading-container.ng-cloak', 'ng-class':'{hidden: queue.length == 0}', ->
 
-    div '.full-screen', 'ui-view':' ', ->
-      div '.loading-large', ->
+    div '.container.full-screen', ->
+      div '.row.tall', ->
+        div '.col-md-3', ->
+            h2 ->
+              a href:'/', 'Topo Experiments'
+            ul '.nav.nav-stacked.nav-pills', ->
+              li 'ng-class':"{active: bxState.current.name=='trackball-camera'}", ->
+                a href:'/trackball-camera', 'Trackball Camera'
+              li 'ng-class':"{active: bxState.current.name=='basic-properties'}", ->
+                a href:'/basic-properties', 'Basic Properties (Cube)'
+              li 'ng-class':"{active: bxState.current.name=='basic-properties-sphere'}", ->
+                a href:'/basic-properties', 'Basic Properties (Sphere)'
+              li 'ng-class':"{active: bxState.current.name=='advanced-properties-sphere'}", ->
+                a href:'/advanced-properties-sphere', 'Advanced Properties (Sphere)'
+              li 'ng-class':"{active: bxState.current.name=='custom-vertices'}", ->
+                a href:'/custom-vertices', 'Custom Vertices'
+              li 'ng-class':"{active: bxState.current.name=='add-shapes'}", ->
+                a href:'/add-shapes', 'Add Shapes'
+        div '.col-md-9.tall', ->
+          div '.full-screen', 'ui-view':' ', ->
 
     div '.clear-20', ->

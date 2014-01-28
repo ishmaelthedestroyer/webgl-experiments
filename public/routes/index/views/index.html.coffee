@@ -1,3 +1,5 @@
+h1 'Click on one of the examples to the left.'
+###
 div '.container.full-screen', 'ng-controller':'IndexCtrl', ->
   div '.row.tall', ->
     div '.col-md-3', ->
@@ -18,3 +20,4 @@ div '.container.full-screen', 'ng-controller':'IndexCtrl', ->
           a href:'/add-shapes', 'Add Shapes'
     div '.col-md-9.tall', ->
       div '.full-screen', 'ui-view':' ', ->
+###

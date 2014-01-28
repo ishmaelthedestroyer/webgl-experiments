@@ -3,6 +3,7 @@ app.config ($stateProvider) ->
     url: '/'
     templateUrl: '/routes/index/views/index.html'
 
+  ###
   $stateProvider.state 'index.basic-properties',
     url: 'basic-properties'
     templateUrl: '/routes/1-basic-properties/views/basic-properties.html'
@@ -28,3 +29,4 @@ app.config ($stateProvider) ->
     url: 'advanced-properties-sphere'
     templateUrl: '/routes/6-advanced-properties-sphere/' +
       'views/advanced-properties-sphere.html'
+  ###
