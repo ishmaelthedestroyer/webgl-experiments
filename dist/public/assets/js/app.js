@@ -770,7 +770,7 @@ app.controller('AdvancedPropertiesSphereCtrl', [
     gui.add(controls, 'widthSegments', 0, 50).onChange(controls.redraw);
     gui.add(controls, 'heightSegments', 0, 50).onChange(controls.redraw);
     gui.add(controls, 'phiLength', 0, 2 * Math.PI).onChange(controls.redraw);
-    gui.add(controls, 'thetaLength', 0, 2 * Math.PI).onChange(controls.redraw);
+    gui.add(controls, 'thetaLength', 0, Math.PI).onChange(controls.redraw);
     guiContainer = document.getElementById('gui');
     guiContainer.appendChild(gui.domElement);
     resize = function() {
