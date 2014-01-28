@@ -21,9 +21,8 @@ html 'ng-controller':'bxCtrl', ->
     script src:'/assets/vendor/three.js/lib/Detector.js'
     script src:'/assets/vendor/three.js/lib/stats.min.js'
     script src:'/assets/vendor/three.js/lib/dat.gui.min.js'
+    script src:'/assets/vendor/three.js/lib/OBJLoader.js'
     script src:'/assets/vendor/three.js/lib/TrackballControls.js'
-    script src:'/assets/vendor/three.js/lib/OrbitControls.js'
-    script src:'/assets/vendor/three.js/lib/PointerLockControls.js'
     script src:'/assets/js/app.js'
     '''
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->

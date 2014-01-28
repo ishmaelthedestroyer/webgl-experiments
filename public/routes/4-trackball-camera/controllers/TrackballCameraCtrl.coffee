@@ -16,7 +16,7 @@ app.controller 'TrackballCameraCtrl', [
     # create a renderer and set size
     renderer = new THREE.WebGLRenderer()
 
-    renderer.setClearColorHex 0xEEEEEE, 1.0
+    renderer.setClearColor 0xEEEEEE, 1.0
     renderer.setSize w, h
     renderer.shadowMapEnabled = true
 
@@ -71,23 +71,6 @@ app.controller 'TrackballCameraCtrl', [
     spotLight.castShadow = true
     scene.add spotLight
 
-    # add mouse controls
-    controls = new THREE.TrackballControls camera
-
-    controls.rotateSpeed = 1.0
-    controls.zoomSpeed = 1.2
-    controls.panSpeed = 0.8
-
-    controls.noZoom = false
-    controls.noPan = false
-
-    controls.staticMoving = true
-    controls.dynamicDampingFactor = 0.3
-
-    controls.keys = [ 65, 83, 68 ]
-
-    controls.addEventListener 'change', render
-
     # add to document
     $('#output').append renderer.domElement
 
@@ -99,16 +82,35 @@ app.controller 'TrackballCameraCtrl', [
       camera.updateProjectionMatrix()
       renderer.setSize w, h
 
-      controls.handleResize()
+      trackballControls.handleResize()
 
     render = () ->
       requestAnimationFrame(render)
       renderer.render scene, camera
 
-      controls.update()
+      trackballControls.update()
 
     # bind resize func to window resize
     window.addEventListener 'resize', resize, false
+
+
+
+    # add mouse controls
+    trackballControls = new THREE.TrackballControls camera, renderer.domElement
+
+    trackballControls.rotateSpeed = 1.0
+    trackballControls.zoomSpeed = 1.2
+    trackballControls.panSpeed = 0.8
+
+    trackballControls.noZoom = false
+    trackballControls.noPan = false
+
+    trackballControls.staticMoving = true
+    trackballControls.dynamicDampingFactor = 0.3
+
+    trackballControls.keys = [ 65, 83, 68 ]
+
+    # trackballControls.addEventListener 'change', render
 
     render()
 

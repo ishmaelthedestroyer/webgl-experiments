@@ -1,5 +1,5 @@
 /** 
- * topo-experiments - v0.0.0 - 2014-01-25
+ * topo-experiments - v0.0.0 - 2014-01-28
  * topo-experiments.com 
  * 
  * Copyright (c) 2014 ishmael td
@@ -465,14 +465,14 @@ app.controller('AddShapesCtrl', [
 
 app.controller('TrackballCameraCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var ambientLight, apply, camera, controls, h, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, spotLight, w, wrap;
+    var ambientLight, apply, camera, h, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, spotLight, trackballControls, w, wrap;
     wrap = document.getElementById('wrap');
     scene = new THREE.Scene();
     w = $('#wrap').width();
     h = $('#wrap').height();
     camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
     renderer = new THREE.WebGLRenderer();
-    renderer.setClearColorHex(0xEEEEEE, 1.0);
+    renderer.setClearColor(0xEEEEEE, 1.0);
     renderer.setSize(w, h);
     renderer.shadowMapEnabled = true;
     planeGeometry = new THREE.PlaneGeometry(60, 60, 10, 10);
@@ -510,16 +510,6 @@ app.controller('TrackballCameraCtrl', [
     spotLight.position.set(-40, 60, 20);
     spotLight.castShadow = true;
     scene.add(spotLight);
-    controls = new THREE.TrackballControls(camera);
-    controls.rotateSpeed = 1.0;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.8;
-    controls.noZoom = false;
-    controls.noPan = false;
-    controls.staticMoving = true;
-    controls.dynamicDampingFactor = 0.3;
-    controls.keys = [65, 83, 68];
-    controls.addEventListener('change', render);
     $('#output').append(renderer.domElement);
     resize = function() {
       w = wrap.clientWidth;
@@ -527,14 +517,23 @@ app.controller('TrackballCameraCtrl', [
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-      return controls.handleResize();
+      return trackballControls.handleResize();
     };
     render = function() {
       requestAnimationFrame(render);
       renderer.render(scene, camera);
-      return controls.update();
+      return trackballControls.update();
     };
     window.addEventListener('resize', resize, false);
+    trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
+    trackballControls.rotateSpeed = 1.0;
+    trackballControls.zoomSpeed = 1.2;
+    trackballControls.panSpeed = 0.8;
+    trackballControls.noZoom = false;
+    trackballControls.noPan = false;
+    trackballControls.staticMoving = true;
+    trackballControls.dynamicDampingFactor = 0.3;
+    trackballControls.keys = [65, 83, 68];
     render();
     return apply = function(scope, fn) {
       if (scope.$$phase || scope.$root.$$phase) {
@@ -670,31 +669,39 @@ app.controller('BasicPropertiesSphereCtrl', [
 
 app.controller('AdvancedPropertiesSphereCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var ambientLight, apply, camera, controls, create, gui, guiContainer, h, mouseControls, render, renderer, resize, scene, shape, spotLight, w, wrap;
+    var ambientLight, apply, camera, clock, controls, create, gui, guiContainer, h, render, renderer, resize, scene, shape, spotLight, trackballControls, w, wrap;
     create = function(geometry) {
-      var material, obj, shape, wireframe;
+      var material, shape;
       material = new THREE.MeshLambertMaterial({
         color: 0x44ff44,
         wireframe: true
       });
       shape = new THREE.Mesh(geometry, material);
       return shape;
-      material = new THREE.MeshNormalMaterial();
-      material.side = THREE.DoubleSide;
-      wireframe = new THREE.MeshBasicMaterial();
-      wireframe.wireframe = true;
-      obj = THREE.SceneUtils.createMultiMaterialObject(geometry, [material, wireframe]);
-      obj.position.y = 4;
-      obj.castShadow = true;
-      return obj;
+      /*
+      material = new THREE.MeshNormalMaterial()
+      material.side = THREE.DoubleSide
+      wireframe = new THREE.MeshBasicMaterial()
+      wireframe.wireframe = true
+      
+      # return object
+      obj = THREE.SceneUtils.createMultiMaterialObject(
+        geometry, [material, wireframe])
+      
+      obj.position.y = 4
+      obj.castShadow = true
+      
+      return obj
+      */
+
     };
+    clock = new THREE.Clock();
     wrap = document.getElementById('wrap');
     scene = new THREE.Scene();
     w = $('#wrap').width();
     h = $('#wrap').height();
-    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
     renderer = new THREE.WebGLRenderer();
-    renderer.setClearColorHex(0xEEEEEE, 1.0);
+    renderer.setClearColor(0xEEEEEE, 1.0);
     renderer.setSize(w, h);
     renderer.shadowMapEnabled = true;
     /*
@@ -716,6 +723,7 @@ app.controller('AdvancedPropertiesSphereCtrl', [
     scene.add plane
     */
 
+    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
     camera.position.x = -30;
     camera.position.y = 40;
     camera.position.z = 30;
@@ -726,9 +734,8 @@ app.controller('AdvancedPropertiesSphereCtrl', [
     spotLight.position.set(-40, 60, 20);
     spotLight.castShadow = true;
     scene.add(spotLight);
-    shape = create(new THREE.SphereGeometry(5, 20, 20));
+    shape = create(new THREE.SphereGeometry(10, 20, 20));
     scene.add(shape);
-    Logger.debug('Added shape.', shape);
     controls = new function() {
       var _this = this;
       this.radius = shape.geometry.radius;
@@ -751,11 +758,6 @@ app.controller('AdvancedPropertiesSphereCtrl', [
       this.thetaStart = 0;
       this.thetaLength = Math.PI;
       this.redraw = function() {
-        Logger.debug('Redrawing.', {
-          radius: _this.radius,
-          widthSegments: _this.widthSegments,
-          heightSegments: _this.heightSegments
-        });
         scene.remove(shape);
         shape = create(new THREE.SphereGeometry(_this.radius, _this.widthSegments, _this.heightSegments, _this.phiStart, _this.phiLength, _this.thetaStart, _this.thetaLength));
         scene.add(shape);
@@ -767,45 +769,38 @@ app.controller('AdvancedPropertiesSphereCtrl', [
     gui.add(controls, 'radius', 0, 50).onChange(controls.redraw);
     gui.add(controls, 'widthSegments', 0, 50).onChange(controls.redraw);
     gui.add(controls, 'heightSegments', 0, 50).onChange(controls.redraw);
-    gui.add(controls, 'phiStart', 0, Math.PI).onChange(controls.redraw);
     gui.add(controls, 'phiLength', 0, 2 * Math.PI).onChange(controls.redraw);
-    gui.add(controls, 'thetaStart', 0, 2 * Math.PI).onChange(controls.redraw);
     gui.add(controls, 'thetaLength', 0, 2 * Math.PI).onChange(controls.redraw);
     guiContainer = document.getElementById('gui');
     guiContainer.appendChild(gui.domElement);
-    mouseControls = new THREE.TrackballControls(camera);
-    mouseControls.rotateSpeed = 1.0;
-    mouseControls.zoomSpeed = 1.2;
-    mouseControls.panSpeed = 0.8;
-    mouseControls.noZoom = false;
-    mouseControls.noPan = false;
-    mouseControls.staticMoving = true;
-    mouseControls.dynamicDampingFactor = 0.3;
-    mouseControls.keys = [65, 83, 68];
-    mouseControls.addEventListener('change', render);
-    $('#output').append(renderer.domElement);
     resize = function() {
       w = wrap.clientWidth;
       h = wrap.clientHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-      return mouseControls.handleResize();
+      return trackballControls.handleResize();
     };
+    window.addEventListener('resize', resize, false);
     render = function() {
       requestAnimationFrame(render);
       renderer.render(scene, camera);
-      return mouseControls.update();
+      return trackballControls.update();
     };
-    window.addEventListener('resize', resize, false);
-    render();
+    $('#output').append(renderer.domElement);
+    trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
+    trackballControls.rotateSpeed = 1.0;
+    trackballControls.zoomSpeed = 1.2;
+    trackballControls.panSpeed = 0.8;
     /*
-    # destroy GUI on scope destroy
-    $scope.$on '$destroy', () ->
-      Logger.debug 'Scope destroyed.'
-      gui.destroy() if gui
+    trackballControls.noZoom = false
+    trackballControls.noPan = false
+    
+    trackballControls.staticMoving = true
+    trackballControls.dynamicDampingFactor = 0.3
     */
 
+    render();
     return apply = function(scope, fn) {
       if (scope.$$phase || scope.$root.$$phase) {
         return fn();

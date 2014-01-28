@@ -10,6 +10,7 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
 
       return shape
 
+      ###
       material = new THREE.MeshNormalMaterial()
       material.side = THREE.DoubleSide
       wireframe = new THREE.MeshBasicMaterial()
@@ -23,6 +24,9 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
       obj.castShadow = true
 
       return obj
+      ###
+
+    clock = new THREE.Clock()
 
     # container for rendering
     wrap = document.getElementById 'wrap'
@@ -33,13 +37,10 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
     w = $('#wrap').width()
     h = $('#wrap').height()
 
-    # create camera to define perspective
-    camera = new THREE.PerspectiveCamera 45, w / h, 0.1, 1000
-
     # create a renderer and set size
     renderer = new THREE.WebGLRenderer()
 
-    renderer.setClearColorHex 0xEEEEEE, 1.0
+    renderer.setClearColor 0xEEEEEE, 1.0
     renderer.setSize w, h
     renderer.shadowMapEnabled = true
 
@@ -62,6 +63,9 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
     scene.add plane
     ###
 
+    # create camera to define perspective
+    camera = new THREE.PerspectiveCamera 45, w / h, 0.1, 1000
+
     # position + point camera to center of the scene
     camera.position.x = -30
     camera.position.y = 40
@@ -79,13 +83,11 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
     scene.add spotLight
 
     # add shape
-    shape = create new THREE.SphereGeometry 5, 20, 20
+    shape = create new THREE.SphereGeometry 10, 20, 20
     scene.add shape
 
-    Logger.debug 'Added shape.', shape
-
     # add controls
-    controls = new ->
+    controls = new () ->
       @radius = shape.geometry.radius
       @widthSegments = shape.geometry.widthSegments
       @heightSegments = shape.geometry.heightSegments
@@ -108,11 +110,6 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
       @thetaLength = Math.PI
 
       @redraw = () =>
-        Logger.debug 'Redrawing.',
-          radius: @radius
-          widthSegments: @widthSegments
-          heightSegments: @heightSegments
-
         scene.remove shape
 
         shape = create(new THREE.SphereGeometry(
@@ -130,33 +127,13 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
     gui.add(controls, 'radius', 0, 50).onChange controls.redraw
     gui.add(controls, 'widthSegments', 0, 50).onChange controls.redraw
     gui.add(controls, 'heightSegments', 0, 50).onChange controls.redraw
-    gui.add(controls, 'phiStart', 0, Math.PI).onChange controls.redraw
+    # gui.add(controls, 'phiStart', 0, Math.PI).onChange controls.redraw
     gui.add(controls, 'phiLength', 0, 2 * Math.PI).onChange controls.redraw
-    gui.add(controls, 'thetaStart', 0, 2 * Math.PI).onChange controls.redraw
+    # gui.add(controls, 'thetaStart', 0, 2 * Math.PI).onChange controls.redraw
     gui.add(controls, 'thetaLength', 0, 2 * Math.PI).onChange controls.redraw
 
     guiContainer = document.getElementById 'gui'
     guiContainer.appendChild gui.domElement
-
-    # add mouse controls
-    mouseControls = new THREE.TrackballControls camera
-
-    mouseControls.rotateSpeed = 1.0
-    mouseControls.zoomSpeed = 1.2
-    mouseControls.panSpeed = 0.8
-
-    mouseControls.noZoom = false
-    mouseControls.noPan = false
-
-    mouseControls.staticMoving = true
-    mouseControls.dynamicDampingFactor = 0.3
-
-    mouseControls.keys = [ 65, 83, 68 ]
-
-    mouseControls.addEventListener 'change', render
-
-    # add to document
-    $('#output').append renderer.domElement
 
     resize = () ->
       w = wrap.clientWidth
@@ -166,25 +143,40 @@ app.controller 'AdvancedPropertiesSphereCtrl', [
       camera.updateProjectionMatrix()
       renderer.setSize w, h
 
-      mouseControls.handleResize()
-
-    render = () ->
-      requestAnimationFrame(render)
-      renderer.render scene, camera
-
-      mouseControls.update()
+      trackballControls.handleResize()
 
     # bind resize func to window resize
     window.addEventListener 'resize', resize, false
 
-    render()
+    render = () ->
+      requestAnimationFrame render
+      renderer.render scene, camera
+
+      trackballControls.update()
+      # trackballControls.update clock.getDelta()
+
+    # trackballControls.addEventListener 'change', render
+
+    # add to document
+    $('#output').append renderer.domElement
+
+
+    # add mouse controls
+    trackballControls = new THREE.TrackballControls camera, renderer.domElement
+
+    trackballControls.rotateSpeed = 1.0
+    trackballControls.zoomSpeed = 1.2
+    trackballControls.panSpeed = 0.8
 
     ###
-    # destroy GUI on scope destroy
-    $scope.$on '$destroy', () ->
-      Logger.debug 'Scope destroyed.'
-      gui.destroy() if gui
+    trackballControls.noZoom = false
+    trackballControls.noPan = false
+
+    trackballControls.staticMoving = true
+    trackballControls.dynamicDampingFactor = 0.3
     ###
+
+    render()
 
 
     apply = (scope, fn) ->
