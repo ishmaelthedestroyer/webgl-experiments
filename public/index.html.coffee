@@ -23,6 +23,8 @@ html 'ng-controller':'bxCtrl', ->
     script src:'/assets/vendor/three.js/lib/dat.gui.min.js'
     script src:'/assets/vendor/three.js/lib/OBJLoader.js'
     script src:'/assets/vendor/three.js/lib/TrackballControls.js'
+    script src:'/assets/vendor/three.js/lib/OrbitControls.js'
+    script src:'/assets/vendor/three.js/lib/Plane.js'
     script src:'/assets/js/app.js'
     '''
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -50,16 +52,20 @@ html 'ng-controller':'bxCtrl', ->
             ul '.nav.nav-stacked.nav-pills', ->
               li 'ng-class':"{active: bxState.current.name=='trackball-camera'}", ->
                 a href:'/trackball-camera', 'Trackball Camera'
-              li 'ng-class':"{active: bxState.current.name=='custom-vertices'}", ->
-                a href:'/custom-vertices', 'Custom Vertices'
               li 'ng-class':"{active: bxState.current.name=='add-shapes'}", ->
                 a href:'/add-shapes', 'Add Shapes'
+              li 'ng-class':"{active: bxState.current.name=='custom-vertices'}", ->
+                a href:'/custom-vertices', 'Custom Vertices'
               li 'ng-class':"{active: bxState.current.name=='basic-properties'}", ->
                 a href:'/basic-properties', 'Basic Properties (Cube)'
               li 'ng-class':"{active: bxState.current.name=='basic-properties-sphere'}", ->
                 a href:'/basic-properties-sphere', 'Basic Properties (Sphere)'
               li 'ng-class':"{active: bxState.current.name=='advanced-properties-sphere'}", ->
                 a href:'/advanced-properties-sphere', 'Advanced Properties (Sphere)'
+              li 'ng-class':"{active: bxState.current.name=='grid-stack'}", ->
+                a href:'/grid-stack', 'Grid Stack'
+              li 'ng-class':"{active: bxState.current.name=='drag-shapes'}", ->
+                a href:'/drag-shapes', 'Drag Shapes'
         div '.col-md-9.tall', ->
           div '.full-screen', 'ui-view':' ', ->
 

@@ -1,5 +1,5 @@
 /** 
- * topo-experiments - v0.0.0 - 2014-01-28
+ * topo-experiments - v0.0.0 - 2014-02-03
  * topo-experiments.com 
  * 
  * Copyright (c) 2014 ishmael td
@@ -64,6 +64,20 @@ app.config(function($stateProvider) {
   return $stateProvider.state('custom-vertices', {
     url: '/custom-vertices',
     templateUrl: '/routes/custom-vertices/views/custom-vertices.html'
+  });
+});
+
+app.config(function($stateProvider) {
+  return $stateProvider.state('drag-shapes', {
+    url: '/drag-shapes',
+    templateUrl: '/routes/drag-shapes/views/drag-shapes.html'
+  });
+});
+
+app.config(function($stateProvider) {
+  return $stateProvider.state('grid-stack', {
+    url: '/grid-stack',
+    templateUrl: '/routes/grid-stack/views/grid-stack.html'
   });
 });
 
@@ -764,6 +778,263 @@ app.controller('CustomVerticesCtrl', [
       return renderer.render(scene, camera);
     };
     window.addEventListener('resize', resize, false);
+    render();
+    return apply = function(scope, fn) {
+      if (scope.$$phase || scope.$root.$$phase) {
+        return fn();
+      } else {
+        return scope.$apply(fn);
+      }
+    };
+  }
+]);
+
+app.controller('DragShapesCtrl', [
+  '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
+    var INTERSECTED, SELECTED, ambientLight, apply, axis, camera, color, createCube, h, mouse, offset, plane, planeGeometry, planeMaterial, projector, render, renderer, resize, scene, shape, spotLight, trackballControls, w, wrap;
+    createCube = function(size, color) {
+      /*
+      color = Math.random() * 0xffffff
+      console.log 'Got color.', color
+      */
+
+      var geometry, material, shape;
+      geometry = new THREE.CubeGeometry(size, size, size);
+      material = new THREE.MeshLambertMaterial({
+        color: color
+      });
+      shape = new THREE.Mesh(geometry, material);
+      shape.name = 'cube-' + scene.children.length;
+      shape = new THREE.Mesh(geometry, material);
+      return shape;
+    };
+    INTERSECTED = null;
+    SELECTED = null;
+    projector = null;
+    mouse = new THREE.Vector2();
+    offset = new THREE.Vector3();
+    wrap = document.getElementById('wrap');
+    scene = new THREE.Scene();
+    w = $('#wrap').width();
+    h = $('#wrap').height();
+    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
+    renderer.setClearColor(0xEEEEEE, 1.0);
+    renderer.setSize(w, h);
+    renderer.shadowMapEnabled = true;
+    renderer.sortObjects = false;
+    planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10);
+    planeMaterial = new THREE.MeshLambertMaterial({
+      color: 0xffffff,
+      wireframe: true
+    });
+    plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    scene.add(plane);
+    axis = new THREE.AxisHelper(100);
+    axis.position.x = 0;
+    axis.position.y = 1;
+    axis.position.z = 0;
+    scene.add(axis);
+    camera.position.x = -125;
+    camera.position.y = 100;
+    camera.position.z = 25;
+    camera.lookAt(scene.position);
+    ambientLight = new THREE.AmbientLight(0x0c0c0c);
+    scene.add(ambientLight);
+    spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(-40, 60, 20);
+    spotLight.castShadow = true;
+    scene.add(spotLight);
+    color = 13258525.865980228;
+    shape = createCube(10, color);
+    shape.position.x = 5;
+    shape.position.y = 5;
+    shape.position.z = 5;
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = 15;
+    shape.position.y = 5;
+    shape.position.z = -35;
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -45;
+    shape.position.y = 5;
+    shape.position.z = 25;
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -15;
+    shape.position.y = 5;
+    shape.position.z = 25;
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -45;
+    shape.position.y = 5;
+    shape.position.z = 45;
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -35;
+    shape.position.y = 5;
+    shape.position.z = -35;
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -25;
+    shape.position.y = 5;
+    shape.position.z = -15;
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = 25;
+    shape.position.y = 5;
+    shape.position.z = 35;
+    scene.add(shape);
+    /*
+    # add controls
+    controls = new ->
+      @rotationSpeed = 0.02
+    
+      @addCube = () ->
+        _size = Math.ceil Math.random() * 3
+    
+        scene.add _cube
+    
+      @addSphere = () ->
+        _size = Math.ceil Math.random() * 3
+        _geometry = new THREE.SphereGeometry _size, 20, 20
+        _material = new THREE.MeshLambertMaterial
+          color: Math.random() * 0xffffff
+        _sphere = new THREE.Mesh _geometry, _material
+        _sphere.name = 'cube-' + scene.children.length
+    
+        # position cube somewhere random on the scene
+        _sphere.position.x = -30 +
+          Math.round Math.random() * planeGeometry.width
+        _sphere.position.y = Math.round Math.random() * 5
+        _sphere.position.z = Math.round Math.random() * planeGeometry.height
+    
+        scene.add _sphere
+    
+      @addCylinder = () ->
+        _size = Math.ceil Math.random() * 3
+        _geometry = new THREE.CylinderGeometry _size, _size, _size * 3
+        _material = new THREE.MeshLambertMaterial
+          color: Math.random() * 0xffffff
+        _shape = new THREE.Mesh _geometry, _material
+        _shape.name = 'cube-' + scene.children.length
+    
+        # position cube somewhere random on the scene
+        _shape.position.x = -30 +
+          Math.round Math.random() * planeGeometry.width
+        _shape.position.y = Math.round Math.random() * 5
+        _shape.position.z = Math.round Math.random() * planeGeometry.height
+    
+        scene.add _shape
+    
+      return @
+    
+    gui = new dat.GUI()
+    gui.add controls, 'rotationSpeed', 0, 0.5
+    gui.add controls, 'addCube'
+    gui.add controls, 'addSphere'
+    gui.add controls, 'addCylinder'
+    
+    guiContainer = document.getElementById 'gui'
+    guiContainer.appendChild gui.domElement
+    */
+
+    $('#output').append(renderer.domElement);
+    resize = function() {
+      w = wrap.clientWidth;
+      h = wrap.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      return trackballControls.handleResize();
+    };
+    render = function() {
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+      return trackballControls.update();
+    };
+    window.addEventListener('resize', resize, false);
+    trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
+    trackballControls.rotateSpeed = 1.0;
+    trackballControls.zoomSpeed = 1.2;
+    trackballControls.panSpeed = 0.8;
+    trackballControls.noZoom = false;
+    trackballControls.noPan = false;
+    trackballControls.staticMoving = true;
+    trackballControls.dynamicDampingFactor = 0.3;
+    trackballControls.keys = [65, 83, 68];
+    projector = new THREE.Projector();
+    render();
+    return apply = function(scope, fn) {
+      if (scope.$$phase || scope.$root.$$phase) {
+        return fn();
+      } else {
+        return scope.$apply(fn);
+      }
+    };
+  }
+]);
+
+app.controller('GridStackCtrl', [
+  '$scope', '$state', 'bxLogger', function($scope, $state, Logger) {
+    var ambientLight, apply, camera, h, helper, orbitControls, render, renderer, resize, scene, spotLight, w, wrap;
+    wrap = document.getElementById('wrap');
+    scene = new THREE.Scene();
+    w = $('#wrap').width();
+    h = $('#wrap').height();
+    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setClearColor(0xEEEEEE, 1.0);
+    renderer.setSize(w, h);
+    renderer.shadowMapEnabled = true;
+    camera.position.x = -60;
+    camera.position.y = 60;
+    camera.position.z = 60;
+    camera.lookAt(scene.position);
+    ambientLight = new THREE.AmbientLight(0x0c0c0c);
+    scene.add(ambientLight);
+    spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(-40, 60, 20);
+    spotLight.castShadow = true;
+    scene.add(spotLight);
+    $('#output').append(renderer.domElement);
+    resize = function() {
+      w = wrap.clientWidth;
+      h = wrap.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      return orbitControls.handleResize();
+    };
+    render = function() {
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+      return orbitControls.update();
+    };
+    window.addEventListener('resize', resize, false);
+    orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+    orbitControls.rotateSpeed = 1.0;
+    orbitControls.zoomSpeed = 1.2;
+    orbitControls.panSpeed = 0.8;
+    orbitControls.noZoom = false;
+    orbitControls.noPan = false;
+    helper = new THREE.GridHelper(100, 10);
+    helper.setColors(0x333333, 0x333333);
+    helper.rotation.x = 0;
+    helper.rotation.y = 0;
+    helper.rotation.z = 0;
+    helper.position.x = 0;
+    helper.position.y = 0;
+    helper.position.z = 0;
+    scene.add(helper);
     render();
     return apply = function(scope, fn) {
       if (scope.$$phase || scope.$root.$$phase) {
