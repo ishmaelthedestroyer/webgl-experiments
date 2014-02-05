@@ -1,5 +1,5 @@
 /** 
- * topo-experiments - v0.0.0 - 2014-02-03
+ * topo-experiments - v0.0.0 - 2014-02-04
  * topo-experiments.com 
  * 
  * Copyright (c) 2014 ishmael td
@@ -114,6 +114,13 @@ app.config(function($stateProvider) {
       'views/advanced-properties-sphere.html'
   */
 
+});
+
+app.config(function($stateProvider) {
+  return $stateProvider.state('select-shapes', {
+    url: '/select-shapes',
+    templateUrl: '/routes/select-shapes/views/select-shapes.html'
+  });
 });
 
 app.config(function($stateProvider) {
@@ -1050,6 +1057,223 @@ app.controller('IndexCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
     var apply;
     $scope.state = $state;
+    return apply = function(scope, fn) {
+      if (scope.$$phase || scope.$root.$$phase) {
+        return fn();
+      } else {
+        return scope.$apply(fn);
+      }
+    };
+  }
+]);
+
+app.controller('SelectShapesCtrl', [
+  '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
+    var INTERSECTED, SELECTED, apply, axis, camera, color, controls, createCube, gui, guiContainer, h, mouse, offset, onDocumentMouseDown, plane, planeGeometry, planeMaterial, projector, render, renderer, resize, scene, select, shape, shapes, trackballControls, w, wrap;
+    createCube = function(size, color) {
+      /*
+      color = Math.random() * 0xffffff
+      console.log 'Got color.', color
+      */
+
+      var geometry, material, shape;
+      geometry = new THREE.CubeGeometry(size, size, size);
+      material = new THREE.MeshBasicMaterial({
+        color: color,
+        opacity: 0.5
+      });
+      shape = new THREE.Mesh(geometry, material);
+      shape.name = 'cube-' + scene.children.length;
+      shape = new THREE.Mesh(geometry, material);
+      return shape;
+    };
+    INTERSECTED = null;
+    SELECTED = null;
+    projector = null;
+    mouse = new THREE.Vector2();
+    offset = new THREE.Vector3();
+    wrap = document.getElementById('wrap');
+    scene = new THREE.Scene();
+    w = $('#wrap').width();
+    h = $('#wrap').height();
+    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    renderer = new THREE.CanvasRenderer();
+    renderer.setClearColor(0xEEEEEE, 1.0);
+    renderer.setSize(w, h);
+    planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10);
+    planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x333333,
+      wireframe: true
+    });
+    plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    scene.add(plane);
+    axis = new THREE.AxisHelper(100);
+    axis.position.x = 0;
+    axis.position.y = 1;
+    axis.position.z = 0;
+    scene.add(axis);
+    camera.position.x = -125;
+    camera.position.y = 100;
+    camera.position.z = 25;
+    camera.lookAt(scene.position);
+    /*
+    # add subtle ambient lighting
+    ambientLight = new THREE.AmbientLight 0x0c0c0c
+    scene.add ambientLight
+    */
+
+    /*
+    # add spotlight for shadows
+    spotLight = new THREE.SpotLight 0xffffff
+    spotLight.position.set 0, 100, 0
+    spotLight.castShadow = false
+    scene.add spotLight
+    */
+
+    color = 13258525.865980228;
+    shapes = [];
+    shape = createCube(10, color);
+    shape.position.x = 5;
+    shape.position.y = 5;
+    shape.position.z = 5;
+    shapes.push(shape);
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = 15;
+    shape.position.y = 5;
+    shape.position.z = -35;
+    shapes.push(shape);
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -45;
+    shape.position.y = 5;
+    shape.position.z = 25;
+    shapes.push(shape);
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -15;
+    shape.position.y = 5;
+    shape.position.z = 25;
+    shapes.push(shape);
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -45;
+    shape.position.y = 5;
+    shape.position.z = 45;
+    shapes.push(shape);
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -35;
+    shape.position.y = 5;
+    shape.position.z = -35;
+    shapes.push(shape);
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = -25;
+    shape.position.y = 5;
+    shape.position.z = -15;
+    shapes.push(shape);
+    scene.add(shape);
+    shape = createCube(10, color);
+    shape.position.x = 25;
+    shape.position.y = 5;
+    shape.position.z = 35;
+    shapes.push(shape);
+    scene.add(shape);
+    SELECTED = shape;
+    select = function(newSelected) {
+      var s, _i, _len;
+      for (_i = 0, _len = shapes.length; _i < _len; _i++) {
+        s = shapes[_i];
+        s.material = new THREE.MeshBasicMaterial({
+          color: 0x333,
+          opacity: 0.5
+        });
+      }
+      SELECTED = newSelected;
+      return SELECTED.material = new THREE.MeshBasicMaterial({
+        opacity: 0.9,
+        color: color
+      });
+    };
+    select(shape);
+    controls = new function() {
+      this.moveUp = function() {
+        return SELECTED.translateX(10);
+      };
+      this.moveDown = function() {
+        return SELECTED.translateX(-10);
+      };
+      this.moveLeft = function() {
+        return SELECTED.translateZ(-10);
+      };
+      this.moveRight = function() {
+        return SELECTED.translateZ(10);
+      };
+      return this;
+    };
+    gui = new dat.GUI();
+    gui.add(controls, 'moveUp');
+    gui.add(controls, 'moveDown');
+    gui.add(controls, 'moveLeft');
+    gui.add(controls, 'moveRight');
+    guiContainer = document.getElementById('gui');
+    guiContainer.appendChild(gui.domElement);
+    $('#output').append(renderer.domElement);
+    resize = function() {
+      w = wrap.clientWidth;
+      h = wrap.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      return trackballControls.handleResize();
+    };
+    render = function() {
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+      return trackballControls.update();
+    };
+    trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
+    trackballControls.rotateSpeed = 1.0;
+    trackballControls.zoomSpeed = 1.2;
+    trackballControls.panSpeed = 0.8;
+    trackballControls.noZoom = false;
+    trackballControls.noPan = false;
+    trackballControls.staticMoving = true;
+    trackballControls.dynamicDampingFactor = 0.3;
+    trackballControls.keys = [65, 83, 68];
+    projector = new THREE.Projector();
+    onDocumentMouseDown = function(e) {
+      var intersects, param1, param2, raycaster, vector;
+      e.preventDefault();
+      /*
+      Logger.debug 'mousedown fired.',
+        x: e.pageX
+        y: e.pageY
+        offsetLeft: $('#output').offset().left
+        offsetTop: $('#output').offset().top
+        newX: e.clientX - renderer.domElement.offsetLeft
+        newY: e.clientY - renderer.domElement.offsetTop
+      */
+
+      param1 = ((e.pageX - $('#output').offset().left) / w) * 2 - 1;
+      param2 = -((e.pageY - $('#output').offset().top) / h) * 2 + 1;
+      vector = new THREE.Vector3(param1, param2, 0.5);
+      projector.unprojectVector(vector, camera);
+      raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+      intersects = raycaster.intersectObjects(shapes);
+      if (intersects.length > 0) {
+        Logger.debug('INTERSECTION DETECTED', intersects);
+        return select(intersects[0].object);
+      }
+    };
+    window.addEventListener('resize', resize, false);
+    renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
+    render();
     return apply = function(scope, fn) {
       if (scope.$$phase || scope.$root.$$phase) {
         return fn();

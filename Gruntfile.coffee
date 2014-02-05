@@ -416,6 +416,10 @@ module.exports = (grunt) ->
         src: [
           '<%= files.client %>'
         ]
+        options:
+          max_line_length:
+            level: 'error'
+            value: 100
         filter: (filename) ->
           split = filename.split '.'
           ext = split[split.length - 1]

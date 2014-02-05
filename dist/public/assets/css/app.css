@@ -74,6 +74,10 @@ em {
   margin-left: 10%;
 }
 
+#output {
+  position: static;
+}
+
 #stl-view {
   width: 100%;
   height: 500px;

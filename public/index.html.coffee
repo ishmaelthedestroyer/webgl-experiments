@@ -64,6 +64,8 @@ html 'ng-controller':'bxCtrl', ->
                 a href:'/advanced-properties-sphere', 'Advanced Properties (Sphere)'
               li 'ng-class':"{active: bxState.current.name=='grid-stack'}", ->
                 a href:'/grid-stack', 'Grid Stack'
+              li 'ng-class':"{active: bxState.current.name=='select-shapes'}", ->
+                a href:'/select-shapes', 'Select Shapes'
               li 'ng-class':"{active: bxState.current.name=='drag-shapes'}", ->
                 a href:'/drag-shapes', 'Drag Shapes'
         div '.col-md-9.tall', ->
