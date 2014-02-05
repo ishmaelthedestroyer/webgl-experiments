@@ -798,8 +798,8 @@ app.controller('CustomVerticesCtrl', [
 
 app.controller('DragShapesCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var INTERSECTED, SELECTED, ambientLight, apply, axis, camera, color, createCube, h, mouse, offset, plane, planeGeometry, planeMaterial, projector, render, renderer, resize, scene, shape, spotLight, trackballControls, w, wrap;
-    createCube = function(size, color) {
+    var INTERSECTED, SELECTED, apply, axis, camera, createCube, h, mouse, offset, onDocumentMouseDown, onDocumentMouseMove, onDocumentMouseUp, plane, planeGeometry, planeMaterial, projector, render, renderer, resize, scene, shape, shapes, trackballControls, w, wrap;
+    createCube = function(size) {
       /*
       color = Math.random() * 0xffffff
       console.log 'Got color.', color
@@ -807,8 +807,9 @@ app.controller('DragShapesCtrl', [
 
       var geometry, material, shape;
       geometry = new THREE.CubeGeometry(size, size, size);
-      material = new THREE.MeshLambertMaterial({
-        color: color
+      material = new THREE.MeshBasicMaterial({
+        color: 0xffffff * Math.random(),
+        opacity: 0.5
       });
       shape = new THREE.Mesh(geometry, material);
       shape.name = 'cube-' + scene.children.length;
@@ -825,20 +826,15 @@ app.controller('DragShapesCtrl', [
     w = $('#wrap').width();
     h = $('#wrap').height();
     camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer({
-      antialias: true
-    });
+    renderer = new THREE.CanvasRenderer();
     renderer.setClearColor(0xEEEEEE, 1.0);
     renderer.setSize(w, h);
-    renderer.shadowMapEnabled = true;
-    renderer.sortObjects = false;
     planeGeometry = new THREE.PlaneGeometry(100, 100, 10, 10);
-    planeMaterial = new THREE.MeshLambertMaterial({
-      color: 0xffffff,
+    planeMaterial = new THREE.MeshBasicMaterial({
+      color: 0x333333,
       wireframe: true
     });
     plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.receiveShadow = true;
     plane.rotation.x = -0.5 * Math.PI;
     plane.position.x = 0;
     plane.position.y = 0;
@@ -853,107 +849,55 @@ app.controller('DragShapesCtrl', [
     camera.position.y = 100;
     camera.position.z = 25;
     camera.lookAt(scene.position);
-    ambientLight = new THREE.AmbientLight(0x0c0c0c);
-    scene.add(ambientLight);
-    spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(-40, 60, 20);
-    spotLight.castShadow = true;
-    scene.add(spotLight);
-    color = 13258525.865980228;
-    shape = createCube(10, color);
+    shapes = [];
+    shape = createCube(10);
     shape.position.x = 5;
     shape.position.y = 5;
     shape.position.z = 5;
+    shapes.push(shape);
     scene.add(shape);
-    shape = createCube(10, color);
+    shape = createCube(10);
     shape.position.x = 15;
     shape.position.y = 5;
     shape.position.z = -35;
+    shapes.push(shape);
     scene.add(shape);
-    shape = createCube(10, color);
+    shape = createCube(10);
     shape.position.x = -45;
     shape.position.y = 5;
     shape.position.z = 25;
+    shapes.push(shape);
     scene.add(shape);
-    shape = createCube(10, color);
+    shape = createCube(10);
     shape.position.x = -15;
     shape.position.y = 5;
     shape.position.z = 25;
+    shapes.push(shape);
     scene.add(shape);
-    shape = createCube(10, color);
+    shape = createCube(10);
     shape.position.x = -45;
     shape.position.y = 5;
     shape.position.z = 45;
+    shapes.push(shape);
     scene.add(shape);
-    shape = createCube(10, color);
+    shape = createCube(10);
     shape.position.x = -35;
     shape.position.y = 5;
     shape.position.z = -35;
+    shapes.push(shape);
     scene.add(shape);
-    shape = createCube(10, color);
+    shape = createCube(10);
     shape.position.x = -25;
     shape.position.y = 5;
     shape.position.z = -15;
+    shapes.push(shape);
     scene.add(shape);
-    shape = createCube(10, color);
+    shape = createCube(10);
     shape.position.x = 25;
     shape.position.y = 5;
     shape.position.z = 35;
+    shapes.push(shape);
     scene.add(shape);
-    /*
-    # add controls
-    controls = new ->
-      @rotationSpeed = 0.02
-    
-      @addCube = () ->
-        _size = Math.ceil Math.random() * 3
-    
-        scene.add _cube
-    
-      @addSphere = () ->
-        _size = Math.ceil Math.random() * 3
-        _geometry = new THREE.SphereGeometry _size, 20, 20
-        _material = new THREE.MeshLambertMaterial
-          color: Math.random() * 0xffffff
-        _sphere = new THREE.Mesh _geometry, _material
-        _sphere.name = 'cube-' + scene.children.length
-    
-        # position cube somewhere random on the scene
-        _sphere.position.x = -30 +
-          Math.round Math.random() * planeGeometry.width
-        _sphere.position.y = Math.round Math.random() * 5
-        _sphere.position.z = Math.round Math.random() * planeGeometry.height
-    
-        scene.add _sphere
-    
-      @addCylinder = () ->
-        _size = Math.ceil Math.random() * 3
-        _geometry = new THREE.CylinderGeometry _size, _size, _size * 3
-        _material = new THREE.MeshLambertMaterial
-          color: Math.random() * 0xffffff
-        _shape = new THREE.Mesh _geometry, _material
-        _shape.name = 'cube-' + scene.children.length
-    
-        # position cube somewhere random on the scene
-        _shape.position.x = -30 +
-          Math.round Math.random() * planeGeometry.width
-        _shape.position.y = Math.round Math.random() * 5
-        _shape.position.z = Math.round Math.random() * planeGeometry.height
-    
-        scene.add _shape
-    
-      return @
-    
-    gui = new dat.GUI()
-    gui.add controls, 'rotationSpeed', 0, 0.5
-    gui.add controls, 'addCube'
-    gui.add controls, 'addSphere'
-    gui.add controls, 'addCylinder'
-    
-    guiContainer = document.getElementById 'gui'
-    guiContainer.appendChild gui.domElement
-    */
-
     $('#output').append(renderer.domElement);
     resize = function() {
       w = wrap.clientWidth;
@@ -968,7 +912,6 @@ app.controller('DragShapesCtrl', [
       renderer.render(scene, camera);
       return trackballControls.update();
     };
-    window.addEventListener('resize', resize, false);
     trackballControls = new THREE.TrackballControls(camera, renderer.domElement);
     trackballControls.rotateSpeed = 1.0;
     trackballControls.zoomSpeed = 1.2;
@@ -979,6 +922,57 @@ app.controller('DragShapesCtrl', [
     trackballControls.dynamicDampingFactor = 0.3;
     trackballControls.keys = [65, 83, 68];
     projector = new THREE.Projector();
+    mouse = new THREE.Vector2();
+    offset = new THREE.Vector3();
+    SELECTED = null;
+    INTERSECTED = false;
+    onDocumentMouseDown = function(e) {
+      var intersects, raycaster, vector;
+      e.preventDefault();
+      vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+      projector.unprojectVector(vector, camera);
+      raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+      intersects = raycaster.intersectObjects(shapes);
+      if (intersects.length > 0) {
+        Logger.debug('INTERSECTION DETECTED', intersects[0].object);
+        SELECTED = intersects[0].object;
+        intersects = raycaster.intersectObject(plane);
+        offset.copy(intersects[0].point).sub(plane.position);
+        return trackballControls.enabled = false;
+      }
+    };
+    onDocumentMouseUp = function(e) {
+      e.preventDefault();
+      trackballControls.enabled = true;
+      if (SELECTED) {
+        return SELECTED = null;
+      }
+      /*
+      if INTERSECTED
+        SELECTED.position.copy INTERSECTED.position
+        SELECTED = null
+        INTERSECTED = false
+      */
+
+    };
+    onDocumentMouseMove = function(e) {
+      var intersects, raycaster, vector;
+      e.preventDefault();
+      mouse.x = ((e.pageX - $('#output').offset().left) / w) * 2 - 1;
+      mouse.y = -((e.pageY - $('#output').offset().top) / h) * 2 + 1;
+      vector = new THREE.Vector3(mouse.x, mouse.y, 5);
+      projector.unprojectVector(vector, camera);
+      raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+      if (SELECTED) {
+        intersects = raycaster.intersectObject(plane);
+        Logger.debug('Got intersects.', intersects);
+        return SELECTED.position.copy(intersects[0].point.sub(offset));
+      }
+    };
+    window.addEventListener('resize', resize, false);
+    renderer.domElement.addEventListener('mousedown', onDocumentMouseDown, false);
+    renderer.domElement.addEventListener('mouseup', onDocumentMouseUp, false);
+    renderer.domElement.addEventListener('mousemove', onDocumentMouseMove, false);
     render();
     return apply = function(scope, fn) {
       if (scope.$$phase || scope.$root.$$phase) {
