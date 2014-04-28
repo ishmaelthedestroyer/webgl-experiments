@@ -20,6 +20,7 @@ app.controller 'ConvexGeometryCtrl', [
     renderer.setSize w, h
     renderer.shadowMapEnabled = true
 
+    ###
     # create ground plane
     planeGeometry = new THREE.PlaneGeometry 60, 40, 1, 1
     planeMaterial = new THREE.MeshLambertMaterial
@@ -35,6 +36,7 @@ app.controller 'ConvexGeometryCtrl', [
 
     # add plane to the scene
     scene.add plane
+    ###
 
     # position + point camera to center of the scene
     camera.position.x = -30
@@ -63,11 +65,24 @@ app.controller 'ConvexGeometryCtrl', [
     scene.add shape
     ###
 
-    # reference to convex obj
+    # reference to convex obj + visible group
     shape = null
+    group = null
 
     createMesh = (geom) ->
-      material = new THREE.MeshNormalMaterial()
+      ###
+      material = new THREE.MeshBasicMaterial()
+      material.side = THREE.DoubleSide
+      wireframeMaterial = new THREE.MeshBasicMaterial
+        color: 0x00ff00
+        transparent: true
+        opacity: 0.2
+      wireframeMaterial.wireframe = true
+      ###
+      material = new THREE.MeshNormalMaterial
+        # color: 0x00ff00
+        transparent: true
+        opacity: 0.2
       material.side = THREE.DoubleSide
       wireframeMaterial = new THREE.MeshBasicMaterial()
       wireframeMaterial.wireframe = true
@@ -93,6 +108,8 @@ app.controller 'ConvexGeometryCtrl', [
           points.push new THREE.Vector3 x, y, z
 
         ###
+        ###
+        scene.remove(group) if group
         group = new THREE.Object3D()
         material = new THREE.MeshBasicMaterial
           color: 0xff0000
@@ -105,7 +122,6 @@ app.controller 'ConvexGeometryCtrl', [
           group.add mesh
 
         scene.add group
-        ###
 
         convexGeom = new THREE.ConvexGeometry points
         convexMesh = createMesh convexGeom
@@ -135,6 +151,7 @@ app.controller 'ConvexGeometryCtrl', [
       camera.updateProjectionMatrix()
       renderer.setSize w, h
 
+    step = 0
     render = () ->
       ###
       # rotate the shapes
@@ -144,6 +161,9 @@ app.controller 'ConvexGeometryCtrl', [
           e.rotation.y += controls.rotationSpeed
           e.rotation.z += controls.rotationSpeed
       ###
+
+      shape.rotation.y = step if shape
+      group.rotation.y = step += 0.01 if group
 
       requestAnimationFrame(render)
       renderer.render scene, camera

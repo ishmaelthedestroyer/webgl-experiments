@@ -658,7 +658,7 @@ app.controller('BasicPropertiesCtrl', [
 
 app.controller('ConvexGeometryCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var ambientLight, apply, camera, controls, createMesh, gui, guiContainer, h, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, shape, spotLight, w, wrap;
+    var ambientLight, apply, camera, controls, createMesh, group, gui, guiContainer, h, render, renderer, resize, scene, shape, spotLight, step, w, wrap;
     wrap = document.getElementById('wrap');
     scene = new THREE.Scene();
     w = $('#wrap').width();
@@ -668,17 +668,24 @@ app.controller('ConvexGeometryCtrl', [
     renderer.setClearColorHex(0xEEEEEE, 1.0);
     renderer.setSize(w, h);
     renderer.shadowMapEnabled = true;
-    planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
-    planeMaterial = new THREE.MeshLambertMaterial({
+    /*
+    # create ground plane
+    planeGeometry = new THREE.PlaneGeometry 60, 40, 1, 1
+    planeMaterial = new THREE.MeshLambertMaterial
       color: 0xffffff
-    });
-    plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.receiveShadow = true;
-    plane.rotation.x = -0.5 * Math.PI;
-    plane.position.x = 0;
-    plane.position.y = 0;
-    plane.position.z = 0;
-    scene.add(plane);
+    plane = new THREE.Mesh planeGeometry, planeMaterial
+    plane.receiveShadow = true
+    
+    # rotate + position the plane
+    plane.rotation.x = -0.5 * Math.PI
+    plane.position.x = 0
+    plane.position.y = 0
+    plane.position.z = 0
+    
+    # add plane to the scene
+    scene.add plane
+    */
+
     camera.position.x = -30;
     camera.position.y = 40;
     camera.position.z = 30;
@@ -701,9 +708,23 @@ app.controller('ConvexGeometryCtrl', [
     */
 
     shape = null;
+    group = null;
     createMesh = function(geom) {
+      /*
+      material = new THREE.MeshBasicMaterial()
+      material.side = THREE.DoubleSide
+      wireframeMaterial = new THREE.MeshBasicMaterial
+        color: 0x00ff00
+        transparent: true
+        opacity: 0.2
+      wireframeMaterial.wireframe = true
+      */
+
       var material, mesh, wireframeMaterial;
-      material = new THREE.MeshNormalMaterial();
+      material = new THREE.MeshNormalMaterial({
+        transparent: true,
+        opacity: 0.2
+      });
       material.side = THREE.DoubleSide;
       wireframeMaterial = new THREE.MeshBasicMaterial();
       wireframeMaterial.wireframe = true;
@@ -712,7 +733,7 @@ app.controller('ConvexGeometryCtrl', [
     };
     controls = new function() {
       this.redraw = function() {
-        var convexGeom, convexMesh, i, points, x, y, z;
+        var convexGeom, convexMesh, i, material, points, x, y, z;
         points = [];
         i = 0;
         while (++i <= 15) {
@@ -722,20 +743,24 @@ app.controller('ConvexGeometryCtrl', [
           points.push(new THREE.Vector3(x, y, z));
         }
         /*
-        group = new THREE.Object3D()
-        material = new THREE.MeshBasicMaterial
-          color: 0xff0000
-          transparent: false
-        
-        points.forEach (p) ->
-          geom = new THREE.SphereGeometry 0.2
-          mesh = new THREE.Mesh geom, material
-          mesh.position = p
-          group.add mesh
-        
-        scene.add group
         */
 
+        if (group) {
+          scene.remove(group);
+        }
+        group = new THREE.Object3D();
+        material = new THREE.MeshBasicMaterial({
+          color: 0xff0000,
+          transparent: false
+        });
+        points.forEach(function(p) {
+          var geom, mesh;
+          geom = new THREE.SphereGeometry(0.2);
+          mesh = new THREE.Mesh(geom, material);
+          mesh.position = p;
+          return group.add(mesh);
+        });
+        scene.add(group);
         convexGeom = new THREE.ConvexGeometry(points);
         convexMesh = createMesh(convexGeom);
         if (shape) {
@@ -759,6 +784,7 @@ app.controller('ConvexGeometryCtrl', [
       camera.updateProjectionMatrix();
       return renderer.setSize(w, h);
     };
+    step = 0;
     render = function() {
       /*
       # rotate the shapes
@@ -769,6 +795,12 @@ app.controller('ConvexGeometryCtrl', [
           e.rotation.z += controls.rotationSpeed
       */
 
+      if (shape) {
+        shape.rotation.y = step;
+      }
+      if (group) {
+        group.rotation.y = step += 0.01;
+      }
       requestAnimationFrame(render);
       return renderer.render(scene, camera);
     };
