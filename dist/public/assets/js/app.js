@@ -658,7 +658,7 @@ app.controller('BasicPropertiesCtrl', [
 
 app.controller('ConvexGeometryCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var ROTATIONSPEED, ambientLight, apply, camera, controls, createMesh, group, gui, guiContainer, h, render, renderer, resize, scene, shape, spotLight, w, wrap;
+    var ambientLight, apply, camera, controls, createMesh, group, gui, guiContainer, h, render, renderer, resize, scene, shape, spotLight, w, wrap;
     wrap = document.getElementById('wrap');
     scene = new THREE.Scene();
     w = $('#wrap').width();
@@ -775,6 +775,7 @@ app.controller('ConvexGeometryCtrl', [
       this.rotateX = false;
       this.rotateY = true;
       this.rotateZ = false;
+      this.rotationSpeed = 1;
       return this;
     };
     controls.redraw();
@@ -786,6 +787,7 @@ app.controller('ConvexGeometryCtrl', [
     gui.add(controls, 'rotateX');
     gui.add(controls, 'rotateY');
     gui.add(controls, 'rotateZ');
+    gui.add(controls, 'rotationSpeed', 0, 10);
     guiContainer = document.getElementById('gui');
     guiContainer.appendChild(gui.domElement);
     $('#output').append(renderer.domElement);
@@ -796,7 +798,6 @@ app.controller('ConvexGeometryCtrl', [
       camera.updateProjectionMatrix();
       return renderer.setSize(w, h);
     };
-    ROTATIONSPEED = 0.01;
     render = function() {
       /*
       # rotate the shapes
@@ -807,28 +808,30 @@ app.controller('ConvexGeometryCtrl', [
           e.rotation.z += controls.rotationSpeed
       */
 
+      var rotationSpeed;
+      rotationSpeed = controls.rotationSpeed / 100;
       if (controls.rotateX) {
         if (shape) {
-          shape.rotation.x += ROTATIONSPEED;
+          shape.rotation.x += rotationSpeed;
         }
         if (group) {
-          group.rotation.x += ROTATIONSPEED;
+          group.rotation.x += rotationSpeed;
         }
       }
       if (controls.rotateY) {
         if (shape) {
-          shape.rotation.y += ROTATIONSPEED;
+          shape.rotation.y += rotationSpeed;
         }
         if (group) {
-          group.rotation.y += ROTATIONSPEED;
+          group.rotation.y += rotationSpeed;
         }
       }
       if (controls.rotateZ) {
         if (shape) {
-          shape.rotation.z += ROTATIONSPEED;
+          shape.rotation.z += rotationSpeed;
         }
         if (group) {
-          group.rotation.z += ROTATIONSPEED;
+          group.rotation.z += rotationSpeed;
         }
       }
       requestAnimationFrame(render);
