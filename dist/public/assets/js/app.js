@@ -1,8 +1,8 @@
 /** 
- * topo-experiments - v0.0.0 - 2014-02-04
+ * topo-experiments - v0.0.0 - 2014-04-28
  * topo-experiments.com 
  * 
- * Copyright (c) 2014 ishmael td
+ * Copyright (c) 2014 
  * Licensed  <>
  * */
 var app;
@@ -57,6 +57,13 @@ app.config(function($stateProvider) {
   return $stateProvider.state('basic-properties', {
     url: '/basic-properties',
     templateUrl: '/routes/basic-properties/views/basic-properties.html'
+  });
+});
+
+app.config(function($stateProvider) {
+  return $stateProvider.state('convex-geometry', {
+    url: '/convex-geometry',
+    templateUrl: '/routes/convex-geometry/views/convex-geometry.html'
   });
 });
 
@@ -627,6 +634,141 @@ app.controller('BasicPropertiesCtrl', [
     };
     render = function() {
       shape.scale.set(controls.scaleX, controls.scaleY, controls.scaleZ);
+      requestAnimationFrame(render);
+      return renderer.render(scene, camera);
+    };
+    window.addEventListener('resize', resize, false);
+    render();
+    /*
+    # destroy GUI on scope destroy
+    $scope.$on '$destroy', () ->
+      Logger.debug 'Scope destroyed.'
+      gui.destroy() if gui
+    */
+
+    return apply = function(scope, fn) {
+      if (scope.$$phase || scope.$root.$$phase) {
+        return fn();
+      } else {
+        return scope.$apply(fn);
+      }
+    };
+  }
+]);
+
+app.controller('ConvexGeometryCtrl', [
+  '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
+    var ambientLight, apply, camera, controls, createMesh, gui, guiContainer, h, plane, planeGeometry, planeMaterial, render, renderer, resize, scene, shape, spotLight, w, wrap;
+    wrap = document.getElementById('wrap');
+    scene = new THREE.Scene();
+    w = $('#wrap').width();
+    h = $('#wrap').height();
+    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setClearColorHex(0xEEEEEE, 1.0);
+    renderer.setSize(w, h);
+    renderer.shadowMapEnabled = true;
+    planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
+    planeMaterial = new THREE.MeshLambertMaterial({
+      color: 0xffffff
+    });
+    plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    scene.add(plane);
+    camera.position.x = -30;
+    camera.position.y = 40;
+    camera.position.z = 30;
+    camera.lookAt(scene.position);
+    ambientLight = new THREE.AmbientLight(0x0c0c0c);
+    scene.add(ambientLight);
+    spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(-40, 60, 20);
+    spotLight.castShadow = true;
+    scene.add(spotLight);
+    /*
+    # add shape
+    material = new THREE.MeshLambertMaterial
+      color: 0x44ff44
+    geometry = new THREE.CubeGeometry 5, 8, 3
+    shape = new THREE.Mesh geometry, material
+    shape.position.y = 4
+    shape.castShadow = true
+    scene.add shape
+    */
+
+    shape = null;
+    createMesh = function(geom) {
+      var material, mesh, wireframeMaterial;
+      material = new THREE.MeshNormalMaterial();
+      material.side = THREE.DoubleSide;
+      wireframeMaterial = new THREE.MeshBasicMaterial();
+      wireframeMaterial.wireframe = true;
+      mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [material, wireframeMaterial]);
+      return mesh;
+    };
+    controls = new function() {
+      this.redraw = function() {
+        var convexGeom, convexMesh, i, points, x, y, z;
+        points = [];
+        i = 0;
+        while (++i <= 15) {
+          x = Math.round(Math.random() * 30) - 20;
+          y = Math.round(Math.random() * 30) - 20;
+          z = Math.round(Math.random() * 30) - 20;
+          points.push(new THREE.Vector3(x, y, z));
+        }
+        /*
+        group = new THREE.Object3D()
+        material = new THREE.MeshBasicMaterial
+          color: 0xff0000
+          transparent: false
+        
+        points.forEach (p) ->
+          geom = new THREE.SphereGeometry 0.2
+          mesh = new THREE.Mesh geom, material
+          mesh.position = p
+          group.add mesh
+        
+        scene.add group
+        */
+
+        convexGeom = new THREE.ConvexGeometry(points);
+        convexMesh = createMesh(convexGeom);
+        if (shape) {
+          scene.remove(shape);
+        }
+        shape = convexMesh;
+        return scene.add(shape);
+      };
+      return this;
+    };
+    controls.redraw();
+    gui = new dat.GUI();
+    gui.add(controls, 'redraw');
+    guiContainer = document.getElementById('gui');
+    guiContainer.appendChild(gui.domElement);
+    $('#output').append(renderer.domElement);
+    resize = function() {
+      w = wrap.clientWidth;
+      h = wrap.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      return renderer.setSize(w, h);
+    };
+    render = function() {
+      /*
+      # rotate the shapes
+      scene.traverse (e) ->
+        if e instanceof THREE.Mesh and e != plane
+          e.rotation.x += controls.rotationSpeed
+          e.rotation.y += controls.rotationSpeed
+          e.rotation.z += controls.rotationSpeed
+      */
+
       requestAnimationFrame(render);
       return renderer.render(scene, camera);
     };

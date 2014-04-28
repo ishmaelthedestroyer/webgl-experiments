@@ -15,7 +15,7 @@
       "url": ""
     }
   ],
-  "author": "ishmael td",
+  "author": "",
   "dependencies": {
     "optimist": "~0.6.0",
     "q": "~0.9.7",

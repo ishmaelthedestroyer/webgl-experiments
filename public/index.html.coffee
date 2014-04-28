@@ -17,6 +17,7 @@ html 'ng-controller':'bxCtrl', ->
     script src:'/assets/vendor/angular-resource/angular-resource.js'
     script src:'/assets/vendor/ngToolboxx/dist/js/ngToolboxx.js'
     script src:'/assets/vendor/three.js/build/three.js'
+    script src:'/assets/vendor/three.js/lib/ConvexGeometry.js'
     script src:'/assets/vendor/three.js/lib/STLLoader.js'
     script src:'/assets/vendor/three.js/lib/Detector.js'
     script src:'/assets/vendor/three.js/lib/stats.min.js'
@@ -56,6 +57,8 @@ html 'ng-controller':'bxCtrl', ->
                 a href:'/add-shapes', 'Add Shapes'
               li 'ng-class':"{active: bxState.current.name=='custom-vertices'}", ->
                 a href:'/custom-vertices', 'Custom Vertices'
+              li 'ng-class':"{active: bxState.current.name=='convex-geometry'}", ->
+                a href:'/convex-geometry', 'Convex Geometry'
               li 'ng-class':"{active: bxState.current.name=='basic-properties'}", ->
                 a href:'/basic-properties', 'Basic Properties (Cube)'
               li 'ng-class':"{active: bxState.current.name=='basic-properties-sphere'}", ->
