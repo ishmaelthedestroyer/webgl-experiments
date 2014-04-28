@@ -658,7 +658,7 @@ app.controller('BasicPropertiesCtrl', [
 
 app.controller('ConvexGeometryCtrl', [
   '$scope', '$state', 'bxSocket', 'bxNotify', 'bxLogger', function($scope, $state, Socket, Notify, Logger) {
-    var ambientLight, apply, camera, controls, createMesh, group, gui, guiContainer, h, render, renderer, resize, scene, shape, spotLight, step, w, wrap;
+    var ROTATIONSPEED, ambientLight, apply, camera, controls, createMesh, group, gui, guiContainer, h, render, renderer, resize, scene, shape, spotLight, w, wrap;
     wrap = document.getElementById('wrap');
     scene = new THREE.Scene();
     w = $('#wrap').width();
@@ -769,11 +769,23 @@ app.controller('ConvexGeometryCtrl', [
         shape = convexMesh;
         return scene.add(shape);
       };
+      this.x = 0;
+      this.y = 0;
+      this.z = 0;
+      this.rotateX = false;
+      this.rotateY = true;
+      this.rotateZ = false;
       return this;
     };
     controls.redraw();
     gui = new dat.GUI();
     gui.add(controls, 'redraw');
+    gui.add(controls, 'x', -10, 10);
+    gui.add(controls, 'y', -10, 10);
+    gui.add(controls, 'z', -10, 10);
+    gui.add(controls, 'rotateX');
+    gui.add(controls, 'rotateY');
+    gui.add(controls, 'rotateZ');
     guiContainer = document.getElementById('gui');
     guiContainer.appendChild(gui.domElement);
     $('#output').append(renderer.domElement);
@@ -784,7 +796,7 @@ app.controller('ConvexGeometryCtrl', [
       camera.updateProjectionMatrix();
       return renderer.setSize(w, h);
     };
-    step = 0;
+    ROTATIONSPEED = 0.01;
     render = function() {
       /*
       # rotate the shapes
@@ -795,11 +807,29 @@ app.controller('ConvexGeometryCtrl', [
           e.rotation.z += controls.rotationSpeed
       */
 
-      if (shape) {
-        shape.rotation.y = step;
+      if (controls.rotateX) {
+        if (shape) {
+          shape.rotation.x += ROTATIONSPEED;
+        }
+        if (group) {
+          group.rotation.x += ROTATIONSPEED;
+        }
       }
-      if (group) {
-        group.rotation.y = step += 0.01;
+      if (controls.rotateY) {
+        if (shape) {
+          shape.rotation.y += ROTATIONSPEED;
+        }
+        if (group) {
+          group.rotation.y += ROTATIONSPEED;
+        }
+      }
+      if (controls.rotateZ) {
+        if (shape) {
+          shape.rotation.z += ROTATIONSPEED;
+        }
+        if (group) {
+          group.rotation.z += ROTATIONSPEED;
+        }
       }
       requestAnimationFrame(render);
       return renderer.render(scene, camera);

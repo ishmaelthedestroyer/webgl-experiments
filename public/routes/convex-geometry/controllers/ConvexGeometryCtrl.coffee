@@ -130,12 +130,29 @@ app.controller 'ConvexGeometryCtrl', [
         shape = convexMesh
         scene.add shape
 
+      @x = 0
+      @y = 0
+      @z = 0
+
+      @rotateX = false
+      @rotateY = true
+      @rotateZ = false
+
       return @
 
     controls.redraw()
 
     gui = new dat.GUI()
     gui.add controls, 'redraw'
+
+    gui.add controls, 'x', -10, 10
+    gui.add controls, 'y', -10, 10
+    gui.add controls, 'z', -10, 10
+
+    gui.add controls, 'rotateX'
+    gui.add controls, 'rotateY'
+    gui.add controls, 'rotateZ'
+
 
     guiContainer = document.getElementById 'gui'
     guiContainer.appendChild gui.domElement
@@ -151,7 +168,7 @@ app.controller 'ConvexGeometryCtrl', [
       camera.updateProjectionMatrix()
       renderer.setSize w, h
 
-    step = 0
+    ROTATIONSPEED = 0.01
     render = () ->
       ###
       # rotate the shapes
@@ -162,8 +179,17 @@ app.controller 'ConvexGeometryCtrl', [
           e.rotation.z += controls.rotationSpeed
       ###
 
-      shape.rotation.y = step if shape
-      group.rotation.y = step += 0.01 if group
+      if controls.rotateX
+        shape.rotation.x += ROTATIONSPEED if shape
+        group.rotation.x += ROTATIONSPEED if group
+
+      if controls.rotateY
+        shape.rotation.y +=ROTATIONSPEED if shape
+        group.rotation.y += ROTATIONSPEED if group
+
+      if controls.rotateZ
+        shape.rotation.z += ROTATIONSPEED if shape
+        group.rotation.z += ROTATIONSPEED if group
 
       requestAnimationFrame(render)
       renderer.render scene, camera
