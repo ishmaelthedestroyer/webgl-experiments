@@ -147,9 +147,11 @@ app.controller 'ConvexGeometryCtrl', [
     gui = new dat.GUI()
     gui.add controls, 'redraw'
 
+    ###
     gui.add controls, 'x', -10, 10
     gui.add controls, 'y', -10, 10
     gui.add controls, 'z', -10, 10
+    ###
 
     gui.add controls, 'rotateX'
     gui.add controls, 'rotateY'
